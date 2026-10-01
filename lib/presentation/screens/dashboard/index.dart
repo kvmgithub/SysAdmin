@@ -26,6 +26,7 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  late final OptimizedSystemResourcesNotifier _resources;
   bool _isAuthenticated = false;
   late int connectionsCount = 0;
   final LocalAuthentication _localAuth = LocalAuthentication();
@@ -33,6 +34,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+    _resources = ref.read(optimizedSystemResourcesProvider.notifier);
     _handleUsageConditions();
     _init();
   }
@@ -146,7 +148,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   @override
   void dispose() {
-    ref.read(optimizedSystemResourcesProvider.notifier).stopMonitoring();
+    if (_resources.mounted) _resources.stopMonitoring();
     super.dispose();
   }
 
