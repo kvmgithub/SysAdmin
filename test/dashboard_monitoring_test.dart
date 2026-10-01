@@ -19,9 +19,9 @@ class Resources extends OptimizedSystemResourcesNotifier {
   int starts = 0;
   bool monitoring = false;
   @override
-  void stopMonitoring() {
+  void stopMonitoring({bool resetState = true}) {
     monitoring = false;
-    super.stopMonitoring();
+    super.stopMonitoring(resetState: resetState);
   }
 
   Resources(super.ref);

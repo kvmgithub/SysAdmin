@@ -148,7 +148,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   @override
   void dispose() {
-    if (_resources.mounted) _resources.stopMonitoring();
+    if (_resources.mounted) _resources.stopMonitoring(resetState: false);
     super.dispose();
   }
 
@@ -168,17 +168,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final isLoading = sshClientAsync.isLoading || connectionStatus.isLoading;
     final error =
         sshClientAsync.asError?.error ?? connectionStatus.asError?.error;
-    final _connectionStatus = isConnected
+    final connectionStatusText = isConnected
         ? 'Connected'
         : isLoading
         ? 'Connecting...'
         : 'Disconnected';
-    final _statusColor = isConnected
+    final statusColor = isConnected
         ? Colors.green
         : isLoading
         ? Colors.amber
         : theme.colorScheme.error;
-    final _connectionError = error?.toString().replaceAll('Exception: ', '');
+    final connectionError = error?.toString().replaceAll('Exception: ', '');
 
     return Scaffold(
       appBar: AppBar(
@@ -223,22 +223,22 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       width: 8,
                       height: 8,
                       decoration: BoxDecoration(
-                        color: _statusColor,
+                        color: statusColor,
                         shape: BoxShape.circle,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      _connectionStatus,
-                      style: TextStyle(color: _statusColor),
+                      connectionStatusText,
+                      style: TextStyle(color: statusColor),
                     ),
                   ],
                 ),
 
                 const SizedBox(height: 8),
 
-                if (_connectionError != null) ...[
-                    Text("$_connectionError"),
+                if (connectionError != null) ...[
+                    Text(connectionError),
                 ]
                 else if (defaultConnAsync.isLoading || connectionStatus.isLoading) ...[
                     const Center(child: CircularProgressIndicator()),
