@@ -1,0 +1,44 @@
+name: Test and build APK
+on:
+  push:
+    branches: [build/test-apk]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.32.5'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+      - name: Test
+        run: flutter test --reporter expanded
+      - name: Sign personal test build
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('android/app/build.gradle')
+          s = p.read_text()
+          s = s.replace('        release {\n            if (keystorePropertiesFile.exists()) {', '        release {\n            signingConfig signingConfigs.debug\n            if (keystorePropertiesFile.exists()) {')
+          p.write_text(s)
+          PY
+      - name: Build ARM64 release APK
+        run: flutter build apk --release --target-platform android-arm64 --build-name 1.1.1-fix --build-number 11011
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SysAdmin-fixed-arm64
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
