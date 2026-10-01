@@ -3,6 +3,9 @@ on:
   push:
     branches: [build/test-apk]
   workflow_dispatch:
+concurrency:
+  group: sysadmin-test-apk
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
@@ -32,7 +35,10 @@ jobs:
           p = Path('android/app/build.gradle')
           s = p.read_text()
           s = s.replace('        release {\n            if (keystorePropertiesFile.exists()) {', '        release {\n            signingConfig signingConfigs.debug\n            if (keystorePropertiesFile.exists()) {')
+          s = s.replace('applicationId = "dev.prathameshkhade.sysadmin"', 'applicationId = "dev.prathameshkhade.sysadmin.fixed"')
           p.write_text(s)
+          manifest = Path('android/app/src/main/AndroidManifest.xml')
+          manifest.write_text(manifest.read_text().replace('android:label="SysAdmin"', 'android:label="SysAdmin Fix"'))
           PY
       - name: Build ARM64 release APK
         run: flutter build apk --release --target-platform android-arm64 --build-name 1.1.1-fix --build-number 11011
